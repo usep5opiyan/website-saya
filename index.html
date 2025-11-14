@@ -3,7 +3,167 @@
 <head>
   <title>Test API Google Apps Script</title>
   <style>
-    body {
+    body {<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      background: #f5f6fa; 
+      margin: 0; 
+      padding: 20px; 
+      position: relative;
+    }
+    body::after {
+      content: "Property Of CCO - Created by Usep Sopiyan";
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 12px;
+      color: rgba(0,0,0,0.15);
+      pointer-events: none;
+      z-index: 0;
+    }
+    h2 { color: #333; position: relative; z-index: 1; }
+    select, input[type="date"], button { padding: 6px 10px; margin: 5px 0; font-size: 14px; position: relative; z-index: 1; }
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; position: relative; z-index: 1; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+    th { background: #007bff; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    a { color: #007bff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    #ccoSelect { min-width: 150px; }
+    p.multi-note { font-size: 12px; color: #555; margin:0 0 10px 0;}
+    #loading { display:none; color:#007bff; font-weight:bold; margin-top:10px;}
+  </style>
+</head>
+<body>
+  <h2>Dashboard Alert dan Monitoring</h2>
+
+  <div>
+    <label>Nama CCO:</label>
+    <select id="ccoSelect" multiple size="3"></select>
+    <p class="multi-note">Tekan Ctrl (Windows) / Cmd (Mac) untuk memilih beberapa CCO</p>
+
+    <label>Tanggal Entry:</label>
+    <input type="date" id="entryDate">
+
+    <button onclick="filterData()">Filter</button>
+    <button onclick="showAllData()">Tampilkan Semua Data</button>
+    <button onclick="downloadExcel()">Download Excel</button>
+  </div>
+
+  <div id="loading">Loading data, mohon tunggu...</div>
+  <div id="tableContainer"></div>
+
+  <script>
+    function showLoading() { document.getElementById('loading').style.display='block'; }
+    function hideLoading() { document.getElementById('loading').style.display='none'; }
+
+    function loadCCO() {
+      google.script.run.withSuccessHandler(function(list) {
+        const select = document.getElementById('ccoSelect');
+        list.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          select.appendChild(opt);
+        });
+      }).getCCOList();
+      showAllData();
+    }
+
+    function renderTable(data, limitView=false) {
+      if (!data || data.length===0) {
+        document.getElementById('tableContainer').innerHTML = "<p>Tidak ada data</p>";
+        return;
+      }
+
+      const headers = Object.keys(data[0]);
+      let html = "<table><tr>";
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += "</tr>";
+
+      let displayData = data;
+      if (!limitView && !document.getElementById('ccoSelect').value && !document.getElementById('entryDate').value) {
+        displayData = data.slice(0, 100);
+      }
+
+      displayData.forEach(row => {
+        html += "<tr>";
+        headers.forEach(h => {
+          let val = row[h] || '';
+
+          if ((h === "Jam Alert ke cabang" || h === "jam kirim report") && val) {
+            let hhmm = '';
+            if (val instanceof Date) {
+              const hh = val.getHours().toString().padStart(2,'0');
+              const mm = val.getMinutes().toString().padStart(2,'0');
+              hhmm = `${hh}:${mm}`;
+            } else if (typeof val === 'string') {
+              const m = val.match(/(\d{2}):(\d{2}):\d{2}$/);
+              if (m) hhmm = `${m[1]}:${m[2]}`;
+              else {
+                const parts = val.split(':');
+                if (parts.length >= 2) hhmm = `${parts[0]}:${parts[1]}`;
+              }
+            }
+            val = hhmm;
+          }
+
+          if (typeof val==='string' && val.includes('https://')) {
+            val = `<a href="${val}" target="_blank">Link</a>`;
+          }
+
+          html += `<td>${val}</td>`;
+        });
+        html += "</tr>";
+      });
+
+      html += "</table>";
+      document.getElementById('tableContainer').innerHTML = html;
+    }
+
+    function filterData() {
+      const select = document.getElementById('ccoSelect');
+      const selectedCCO = Array.from(select.selectedOptions).map(opt => opt.value);
+      const date = document.getElementById('entryDate').value;
+
+      showLoading();
+      google.script.run.withSuccessHandler(function(data){
+        renderTable(data, true);
+        hideLoading();
+      }).getFilteredData(selectedCCO, date);
+    }
+
+    function showAllData() {
+      showLoading();
+      google.script.run.withSuccessHandler(function(data){
+        renderTable(data);
+        hideLoading();
+      }).getAllData();
+    }
+
+    function downloadExcel() {
+      const select = document.getElementById('ccoSelect');
+      const selectedCCO = Array.from(select.selectedOptions).map(opt => opt.value);
+      const date = document.getElementById('entryDate').value;
+
+      showLoading();
+      google.script.run.withSuccessHandler(function(url){
+        hideLoading();
+        if(url) window.open(url,'_blank');
+        else alert("Tidak ada data untuk di-download!");
+      }).downloadExcel(selectedCCO, date);
+    }
+
+    window.onload = loadCCO;
+  </script>
+</body>
+</html>
+
       font-family: Arial, sans-serif;
       padding: 20px;
     }

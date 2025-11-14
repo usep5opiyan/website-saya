@@ -1,27 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Test Google Script</title>
+  <title>Test API Google Apps Script</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #output {
+      background: #f4f4f4;
+      padding: 15px;
+      white-space: pre-wrap;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056d2;
+    }
+  </style>
 </head>
 <body>
-  <h2>Test API Google Apps Script</h2>
 
-  <button onclick="getData()">Ambil Data</button>
+  <h2>🔎 Test API Google Apps Script</h2>
 
-  <pre id="output"></pre>
+  <button onclick="getAll()">Ambil Semua Data</button>
+  <button onclick="getCCO()">Ambil List CCO</button>
+
+  <h3>Hasil:</h3>
+  <pre id="output">Klik tombol untuk mengambil data...</pre>
 
   <script>
-    function getData() {
-      fetch("https://script.google.com/macros/s/AKfycbylAO-0CGYH3YjbJxf3R0Pw4jhBswwAxhLX-wk_oxlMnDBGWR0hqZB5-kq61LpBCT8YDA/exec")
-        .then(res => res.text())
-        .then(data => {
-          document.getElementById("output").innerText = data;
-        })
-        .catch(err => {
-          document.getElementById("output").innerText = "Error: " + err;
-          console.error(err);
-        });
+    const API = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec";
+
+    function show(data) {
+      document.getElementById("output").innerText = 
+        typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
+    function getAll() {
+      fetch(API + "?action=getAll")
+        .then(res => res.json())
+        .then(data => show(data))
+        .catch(err => show("Error: " + err));
+    }
+
+    function getCCO() {
+      fetch(API + "?action=getCCO")
+        .then(res => res.json())
+        .then(data => show(data))
+        .catch(err => show("Error: " + err));
     }
   </script>
+
 </body>
 </html>

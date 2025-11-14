@@ -12,12 +12,15 @@
 
   <script>
     function getData() {
-      fetch("https://script.google.com/macros/s/AKfycbwLEk8wfxHytvpk7gNoGADCByY3CiS1qnrlp-CcPTqla_bCb8MhLyNejpJ2UAlbeSoJUw/exec")
+      fetch("https://script.google.com/macros/s/AKfycbylAO-0CGYH3YjbJxf3R0Pw4jhBswwAxhLX-wk_oxlMnDBGWR0hqZB5-kq61LpBCT8YDA/exec")
         .then(res => res.text())
         .then(data => {
           document.getElementById("output").innerText = data;
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+          document.getElementById("output").innerText = "Error: " + err;
+          console.error(err);
+        });
     }
   </script>
 </body>

@@ -1,1 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Google Script</title>
+</head>
+<body>
+  <h2>Test API Google Apps Script</h2>
 
+  <button onclick="getData()">Ambil Data</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    function getData() {
+      fetch("https://script.google.com/macros/s/AKfycbwLEk8wfxHytvpk7gNoGADCByY3CiS1qnrlp-CcPTqla_bCb8MhLyNejpJ2UAlbeSoJUw/exec")
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("output").innerText = data;
+        })
+        .catch(err => console.error(err));
+    }
+  </script>
+</body>
+</html>
